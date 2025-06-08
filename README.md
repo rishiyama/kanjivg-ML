@@ -2,8 +2,6 @@
 > [!NOTE]
 > These tools are based on the [KanjiVG](https://github.com/KanjiVG/kanjivg) project.
 
-# KanjiVG ML Dataset Generator
-
 This is an unofficial implementation to generate a Machine Learning dataset from the [KanjiVG](https://github.com/KanjiVG/kanjivg) project.
 
 
