@@ -36,6 +36,16 @@ pip install CairoSVG
 apt install libcairo2
 ```
 
+> **Optional:**
+>```bash
+>python example.py
+>```
+>if you can get the output like this, then you are ready to use the kanjivg and kanjivg-ML package.
+>```
+>$ python example.py 
+>Is 0x4E00 a kanji? True
+>```
+
 ## Usage
 **Generate a dataset:**
 ```bash
