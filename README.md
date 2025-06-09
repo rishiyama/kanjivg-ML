@@ -11,7 +11,10 @@ This is an unofficial implementation to generate datasets for Machine learning e
 - **Status:** Unofficial, for research/personal use.
 
 
-## Usage
+## Setup
+- python 3.10>=
+- ubuntu 
+
 **1. Clone the KanjiVG-ML repository:**
 ```bash
 git clone https://github.com/rishiyama/kanjivg-ML
@@ -26,13 +29,24 @@ bash scripts/init.sh
 ```
 
 **3. Install any required dependencies:**
-- cairo:
+
+cairo:
 ```bash
 pip install CairoSVG 
 apt install libcairo2
 ```
 
+## Usage
+**Generate a dataset:**
+```bash
+python run.py
+```
+and also, you can customize the parameters of png-images, such as width, height, and save directory by using the following command:
 
+```bash
+# same as default
+python run.py --path ./kanjivg/kanji --width 256 --height 256 --save_dir ./output
+```
 <!--
 ## Prerequisites
 
