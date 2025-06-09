@@ -1,9 +1,10 @@
 # from kanjivg.kanjivg import parse_kanji_svg, listSvgFiles
 # from kanjivg import SVGHandler, isKanji, isGeneralKanji
-import kanjivg
+from kanjivg import kanjivg, xmlhandler, utils
 
 def main():
-    print("Starting Kanji SVG Parser...")
+    check = kanjivg.isKanji(0x4E00)  # Example usage of the isGeneralKanji function
+    print(f"Is 0x4E00 a general kanji? {check}")
 
 if __name__ == "__main__":
     main()
