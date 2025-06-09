@@ -37,9 +37,7 @@ apt install libcairo2
 ```
 
 > **Optional:**
->```bash
->python example.py
->```
+>
 >if you can get the output like this, then you are ready to use the kanjivg and kanjivg-ML package.
 >```
 >$ python example.py 
