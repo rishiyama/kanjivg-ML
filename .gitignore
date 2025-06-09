@@ -2,7 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 kanjivg
-
+old
+*history*
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
