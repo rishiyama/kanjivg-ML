@@ -1,27 +1,22 @@
-from xml.sax import handler
-import torch
-import torch.nn as nn
-from kanjivg_utils import *
-# from kanjivg import SVGHandler, KanjisHandler, Kanji, isKanji, isGeneralKanji
-from kanjivg import SVGHandler, isKanji, isGeneralKanji
 import xml
 import xml.etree.ElementTree as etree
-from pydiffvg.parse_svg import svg_to_scene
-from svgpathtools import svg2paths
-from natsort import natsorted
+
 import numpy as np
+from natsort import natsorted
 import pathlib 
+
 from copy import deepcopy
 from cairosvg import svg2png
 from PIL import Image
+import tqdm
+import json
+
+from kanjivg.utils import *
+from kanjivg.kanjivg import SVGHandler, isKanji
+from kanjivg_ml.check import isGeneralKanji, getGenralKanjiRange
+
 
 def path_to_simple_svg(path_data:list, attr:dict, style:str, filename:str):
-    
-    
-    # stroke_list = kanji_data.getStrokes()
-    # path_data = []
-    # for s in stroke_list:
-    #     path_data.append(s.svg)
         
     assert len(path_data) > 0
     
@@ -49,9 +44,6 @@ def path_to_svg(path_data:list, attr:dict, style:str, dirname:str, key:str, pref
     remake_svg = path_to_simple_svg(path_data, attr, style, path)
     return remake_svg, path
 
-
-
-
 def convert_to_white_background(input_file, output_file):
     with Image.open(input_file) as img:
         if img.mode in ("RGBA", "LA", "P"):
@@ -59,7 +51,6 @@ def convert_to_white_background(input_file, output_file):
             white_bg = Image.new("RGB", img.size, "white")
             white_bg.paste(img, mask=img.getchannel("A"))
             white_bg.save(output_file)
-      
 
 def make_dirs_recursive(path: pathlib.Path):
     for p in path.parents:
@@ -76,7 +67,9 @@ def set_prefix(index:int):
     
     return res
     
-def parse_kanji_svg(filename):
+def parse_kanji_svg(filename, width, height, save_dir='./output'):
+    save_dir = pathlib.Path(save_dir)
+
 
     handler = SVGHandler()
     parser = xml.sax.make_parser()
@@ -114,24 +107,20 @@ def parse_kanji_svg(filename):
     for i in range(len(path_data) + 1):
         sub_path_data = deepcopy(path_data)
 
-
         if i > 0:
-            if len(sub_path_data) == 1:
-                break
-            else:
-                sub_path_data.pop(i-1)
+            break
         
+        save_dir_child = 'other'
         if kanji_flg:
-            path = pathlib.Path('/home/rish/scratch/lines/StrokeRemover/kanji_path/kanji/svg/')
-            path_png = pathlib.Path('/home/rish/scratch/lines/StrokeRemover/kanji_path/kanji/png/')
-            path_png_w = pathlib.Path('/home/rish/scratch/lines/StrokeRemover/kanji_path/kanji/png_white/')
-        else:
-            path = pathlib.Path('/home/rish/scratch/lines/StrokeRemover/kanji_path/other/svg/')
-            path_png = pathlib.Path('/home/rish/scratch/lines/StrokeRemover/kanji_path/other/png/')
-            path_png_w = pathlib.Path('/home/rish/scratch/lines/StrokeRemover/kanji_path/other/png_white/')
+            save_dir_child = 'kanji'
         
+        path = save_dir / save_dir_child / 'svg'
+        path_png = save_dir / save_dir_child / 'png'
+        path_png_w = save_dir / save_dir_child / 'png_white'
         
-        prefix = set_prefix(int(i)) 
+        # prefix = set_prefix(int(i)) 
+        prefix = key
+        key = ''
         remake_svg, out_path = path_to_svg(sub_path_data, attr, style, path, key, prefix)
         path_png_ = path_png / out_path.relative_to(path).with_suffix(".png")
         path_png_w_ = path_png_w / out_path.relative_to(path).with_suffix(".png")
@@ -141,46 +130,57 @@ def parse_kanji_svg(filename):
         
         assert attr["width"] == attr["height"] == str(109)
         
-        w, h = 224, 224
+        # w, h = 224, 224
+        w, h = width, height
         svg2png(url=str(out_path), write_to=str(path_png_), output_width=w, output_height=h)
         convert_to_white_background(path_png_, path_png_w_)
         
     return remake_svg, path_data, attr, kanji_flg
 
-
-
 def args_parser():
     import argparse
     parser = argparse.ArgumentParser(description="Kanji SVG Parser")
     parser.add_argument('--path', type=str, default='./kanjivg/kanji', help='Path to the kanji SVG files')
+    parser.add_argument('--width', type=int, default=256, help='Width of the output images')
+    parser.add_argument('--height', type=int, default=256, help='Height of the output images')
+    parser.add_argument('--save_dir', type=str, default='./output', help='Directory to save the output files')
     return parser.parse_args()
 
-
-def main():
-    arg = args_parser()    
-    path = arg.path
+def main(path, width, height, save_dir):
 
     l = listSvgFiles(path)
     l = natsorted(l, key=lambda x: x.path)
     print("-> number of files: ", len(l))
     
-    all_path_data = []
-    number_of_path = []
-    for k in l:
-        # print(k.path)
-        attr_svg, path_data, attr, kanji_flg = parse_kanji_svg(k.path)
+    # width, height = 256, 256
+    # width, height = 16, 16
+
+    for k in tqdm.tqdm(l, desc="Processing SVG files", unit="file"):
+        attr_svg, path_data, attr, kanji_flg = parse_kanji_svg(k.path, width, height, save_dir)
         
-        if kanji_flg == False:
-            continue
-        
-        all_path_data.append(path_data)
-        number_of_path.append(len(path_data))
-        # print(path_data)
-        # print(k.id)
-        
-    number_of_path = np.array(number_of_path)
-    print("-> number of path: ", number_of_path)
-    np.save("number_of_path.npy", number_of_path)
     
+    start, end = getGenralKanjiRange()
+    # save config
+    config = {
+        "width": width,
+        "height": height,
+        "isGeneralKanji": {
+            "start": start,
+            "end": end,
+        }
+    }
+
+    # save as json
+    
+    with open(save_dir + '/config.json', 'w') as f:
+        json.dump(config, f, indent=4)
+
+
 if __name__ == '__main__':
-    main()
+    arg = args_parser()    
+    path = arg.path
+    width = arg.width
+    height = arg.height
+    save_dir = arg.save_dir
+
+    main(path, width, height, save_dir)
