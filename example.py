@@ -4,7 +4,7 @@ from kanjivg import kanjivg, xmlhandler, utils
 
 def main():
     check = kanjivg.isKanji(0x4E00)  # Example usage of the isGeneralKanji function
-    print(f"Is 0x4E00 a general kanji? {check}")
+    print(f"Is 0x4E00 a kanji? {check}")
 
 if __name__ == "__main__":
     main()
