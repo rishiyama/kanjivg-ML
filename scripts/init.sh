@@ -1,0 +1,1 @@
+cp scripts/src/__init__.py kanjivg/__init__.py
