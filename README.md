@@ -24,7 +24,15 @@ git clone https://github.com/KanjiVG/kanjivg.git
 # fix kanjivg/__init__.py to import kanjivg
 bash scripts/init.sh 
 ```
-(`pip install kanjivg` doesn't work for some reason)
+
+**3. Install any required dependencies:**
+- cairo:
+```bash
+pip install CairoSVG 
+apt install libcairo2
+```
+
+
 <!--
 ## Prerequisites
 
