@@ -55,6 +55,25 @@ and also, you can customize the parameters of png-images, such as width, height,
 # same as default
 python run.py --path ./kanjivg/kanji --width 256 --height 256 --save_dir ./output
 ```
+
+result
+```bash
+output
+|-- kanji
+|   |-- png
+|   |-- png_white
+|   `-- svg
+`-- other
+    |-- png
+    |-- png_white
+    `-- svg
+```
+- kanji: contains the kanji images by filtering.
+- other: contains the non-kanji images by filtering.
+- png: contains the kanji images in PNG format with a transparent background.
+- png_white: contains the kanji images in PNG format with a white background.
+- svg: contains the kanji images in SVG format, using simplified SVG paths.
+
 <!--
 ## Prerequisites
 
